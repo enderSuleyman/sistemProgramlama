@@ -79,6 +79,7 @@ class Ui_Form(object):
         self.k_adi.setObjectName(_fromUtf8("k_adi"))
         self.sifre = QtGui.QLineEdit(Form)
         self.sifre.setGeometry(QtCore.QRect(200, 100, 113, 27))
+        self.sifre.setEchoMode(QtGui.QLineEdit.Password)
         self.sifre.setObjectName(_fromUtf8("sifre"))
         self.giris = QtGui.QPushButton(Form)
         self.giris.setGeometry(QtCore.QRect(140, 160, 98, 27))
