@@ -1,6 +1,5 @@
 from PyQt4 import QtCore, QtGui
-import os
-import os.path
+
 import time
 import subprocess
 
@@ -11,7 +10,7 @@ import sqlite3 as sql
 from PyQt4.QtCore import *
 
 db_name = "data1.db"
-bilgiler1 = ""
+bilgiler = ""
 
 if not os.path.isfile(db_name):
     with sql.connect(db_name) as vt:
@@ -22,12 +21,12 @@ if not os.path.isfile(db_name):
         im.execute("""INSERT INTO users VALUES("root","0000")""")
         vt.commit()
         im.execute("""SELECT * FROM users""")
-        bilgiler1 = im.fetchall()
+        bilgiler = im.fetchall()
 else:
     with sql.connect(db_name) as vt:
         im = vt.cursor()
         im.execute("""SELECT * FROM users""")
-        bilgiler1=im.fetchall()
+        bilgiler=im.fetchall()
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -44,24 +43,6 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Form(object):
-    def ender(self):
-
-        for kul in bilgiler1:
-          k_ad,k_sifre = kul
-
-
-
-          if self.k_adi.text().__eq__(k_ad) and self.sifre.text().__eq__(k_sifre):
-
-            subprocess.Popen("firefox",shell=True,stdout=subprocess.PIPE)
-            sys.exit()
-          else :
-              self.label_3.setText("yanlış bilgi girdiniz")
-
-
-
-
-
     def setupUi(self, Form):
         Form.setObjectName(_fromUtf8("Form"))
         Form.resize(387, 244)
@@ -74,6 +55,7 @@ class Ui_Form(object):
         self.label_2 = QtGui.QLabel(Form)
         self.label_2.setGeometry(QtCore.QRect(80, 100, 91, 17))
         self.label_2.setObjectName(_fromUtf8("label_2"))
+
         self.k_adi = QtGui.QLineEdit(Form)
         self.k_adi.setGeometry(QtCore.QRect(200, 50, 113, 27))
         self.k_adi.setObjectName(_fromUtf8("k_adi"))
@@ -84,26 +66,40 @@ class Ui_Form(object):
         self.giris = QtGui.QPushButton(Form)
         self.giris.setGeometry(QtCore.QRect(140, 160, 98, 27))
         self.giris.setObjectName(_fromUtf8("giris"))
-        self.giris.clicked.connect(self.ender)
-
+        self.giris.clicked.connect(self.yaz)
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
+
+    def yaz(self):
+        for veri in bilgiler:
+            kul_adi,sifre = veri
+            if(self.k_adi.text().__eq__(kul_adi) and self.sifre.text().__eq__(sifre)):
+                subprocess.Popen(uygulama_adi,shell=True,stdout=subprocess.PIPE)
+                sys.exit()
+            else:
+             self.label_3.setText("yanlış bilgi girdiniz")
+
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(_translate("Form", "Form", None))
         self.label.setText(_translate("Form", "Kullanici Adi :", None))
         self.label_2.setText(_translate("Form", "Sifre                :", None))
-
         self.giris.setText(_translate("Form", "Giris", None))
 
-bilgiler = "firefox"
+uygulama_adi = ""
+vt = sql.connect("data1.db")
+im = vt.cursor()
+im.execute("""SELECT * FROM uygulama""")
+uygulama_adi = ''.join(im.fetchone())  #bu kod olmadan çalışmıyor dönüştürme işlemi yapıyor.string
+print(uygulama_adi)
+vt.cursor()
+vt.close()
+
 
 while True:
-    b = str(subprocess.Popen("ps x |grep -v grep |grep -c "+bilgiler, shell=True, stdout=subprocess.PIPE).stdout.read())
-    if b.__contains__("0"):
-        print("yok")
-    elif b.__contains__("1"):
-        print(subprocess.Popen("pkill -9 "+bilgiler, shell=True, stdout=subprocess.PIPE).stdout.read())
+    b = str(subprocess.Popen("ps x |grep -v grep |grep -c "+uygulama_adi, shell=True, stdout=subprocess.PIPE).stdout.read())
+    if b.__contains__("1"):
+        print(subprocess.Popen("pkill -9 "+uygulama_adi, shell=True, stdout=subprocess.PIPE).stdout.read())
         app = QtGui.QApplication(sys.argv)
         Dialog = QtGui.QDialog()
         ui = Ui_Form()
