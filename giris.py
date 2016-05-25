@@ -1,32 +1,21 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'giris.ui'
+#
+# Created by: PyQt4 UI code generator 4.11.4
+#
+# WARNING! All changes made in this file will be lost!
+
+import subprocess,time,sys
 from PyQt4 import QtCore, QtGui
 
-import time
-import subprocess
+import classes
+from classes import Uygulamalar
+from classes import Kullanicilar
 
-from time import strftime
-import sys,os
-import sqlite3 as sql
+import threading
 
-from PyQt4.QtCore import *
-
-db_name = "data1.db"
-bilgiler = ""
-
-if not os.path.isfile(db_name):
-    with sql.connect(db_name) as vt:
-        im = vt.cursor()
-        im.execute("""CREATE TABLE IF NOT EXISTS users("k_ad","k_sifre")""")
-        im.execute("""INSERT INTO users VALUES("suleyman","1234")""")
-        im.execute("""INSERT INTO users VALUES("ender","4321")""")
-        im.execute("""INSERT INTO users VALUES("root","0000")""")
-        vt.commit()
-        im.execute("""SELECT * FROM users""")
-        bilgiler = im.fetchall()
-else:
-    with sql.connect(db_name) as vt:
-        im = vt.cursor()
-        im.execute("""SELECT * FROM users""")
-        bilgiler=im.fetchall()
+kullanicilar = Kullanicilar()
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -45,65 +34,83 @@ except AttributeError:
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName(_fromUtf8("Form"))
-        Form.resize(387, 244)
-        self.label_3=QtGui.QLabel(Form)
-        self.label_3.setGeometry(QtCore.QRect(80, 15, 150, 25))
-        self.label_3.setObjectName(_fromUtf8("label_3"))
+        Form.resize(400, 145)
+        self.lineEdit = QtGui.QLineEdit(Form)
+        self.lineEdit.setGeometry(QtCore.QRect(150, 10, 181, 27))
+        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
+        self.lineEdit_2 = QtGui.QLineEdit(Form)
+        self.lineEdit_2.setGeometry(QtCore.QRect(150, 50, 181, 27))
+        self.lineEdit_2.setEchoMode(QtGui.QLineEdit.Password)
+        self.lineEdit_2.setObjectName(_fromUtf8("lineEdit_2"))
         self.label = QtGui.QLabel(Form)
-        self.label.setGeometry(QtCore.QRect(80, 50, 101, 17))
+        self.label.setGeometry(QtCore.QRect(30, 10, 101, 17))
         self.label.setObjectName(_fromUtf8("label"))
         self.label_2 = QtGui.QLabel(Form)
-        self.label_2.setGeometry(QtCore.QRect(80, 100, 91, 17))
+        self.label_2.setGeometry(QtCore.QRect(80, 50, 66, 17))
         self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.pushButton = QtGui.QPushButton(Form)
+        self.pushButton.setGeometry(QtCore.QRect(150, 100, 98, 27))
+        self.pushButton.setObjectName(_fromUtf8("pushButton"))
+        self.pushButton.clicked.connect(self.ac)
 
-        self.k_adi = QtGui.QLineEdit(Form)
-        self.k_adi.setGeometry(QtCore.QRect(200, 50, 113, 27))
-        self.k_adi.setObjectName(_fromUtf8("k_adi"))
-        self.sifre = QtGui.QLineEdit(Form)
-        self.sifre.setGeometry(QtCore.QRect(200, 100, 113, 27))
-        self.sifre.setEchoMode(QtGui.QLineEdit.Password)
-        self.sifre.setObjectName(_fromUtf8("sifre"))
-        self.giris = QtGui.QPushButton(Form)
-        self.giris.setGeometry(QtCore.QRect(140, 160, 98, 27))
-        self.giris.setObjectName(_fromUtf8("giris"))
-        self.giris.clicked.connect(self.yaz)
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
-    def yaz(self):
-        for veri in bilgiler:
-            kul_adi,sifre = veri
-            if(self.k_adi.text().__eq__(kul_adi) and self.sifre.text().__eq__(sifre)):
-                subprocess.Popen(uygulama_adi,shell=True,stdout=subprocess.PIPE)
-                sys.exit()
-            else:
-             self.label_3.setText("yanlış bilgi girdiniz")
-
+    def ac(self):
+        self.i=True
+        for i in range(kullanicilar.id.__len__()):
+            kullanici_adi = kullanicilar.kul[i]
+            sifre = kullanicilar.sifre[i]
+            if(self.lineEdit.text().__eq__(kullanici_adi) and self.lineEdit_2.text().__eq__(sifre)):
+                if self.lineEdit.text().__eq__("root"):
+                    subprocess.Popen(ana_uyg,shell=True,stdout=subprocess.PIPE)
+                    while True:
+                        self.kapali_mi()
+                elif not self.lineEdit.text().__eq__("root"):
+                    var_mi = classes.var_mi(kullanici_adi,ana_uyg)
+                    if var_mi:
+                        subprocess.Popen(ana_uyg,shell=True,stdout=subprocess.PIPE)
+                    elif not var_mi:
+                        print(kullanici_adi+" malesef yetkiniz yok")
+        sys.exit()
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(_translate("Form", "Form", None))
-        self.label.setText(_translate("Form", "Kullanici Adi :", None))
-        self.label_2.setText(_translate("Form", "Sifre                :", None))
-        self.giris.setText(_translate("Form", "Giris", None))
+        self.label.setText(_translate("Form", "Kullanıcı Adı :", None))
+        self.label_2.setText(_translate("Form", "Sifre :", None))
+        self.pushButton.setText(_translate("Form", "Giriş Yap", None))
 
-uygulama_adi = ""
-vt = sql.connect("data1.db")
-im = vt.cursor()
-im.execute("""SELECT * FROM uygulama""")
-uygulama_adi = ''.join(im.fetchone())  #bu kod olmadan çalışmıyor dönüştürme işlemi yapıyor.string
-print(uygulama_adi)
-vt.cursor()
-vt.close()
+    def kapali_mi(self):
+        sonuc = str(subprocess.Popen("ps x |grep -v grep |grep -c "+ana_uyg,shell=True,stdout=subprocess.PIPE).stdout.read())
+        if sonuc.__contains__("0") and self.i==True:
+            self.i=False
+            islem = subprocess.Popen("python3 yonetici.py",shell=True)
+            islem.communicate()
+        time.sleep(2)
 
+
+uyg = Uygulamalar()
+list1 = uyg.dondur()
+
+class Bekle(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+    def run(self):
+        for i in list1:
+            uyga = ''.join(i)
+            sonuc = str(subprocess.Popen("ps x |grep -v grep |grep -c "+uyga,shell=True,stdout=subprocess.PIPE).stdout.read())
+            if sonuc.__contains__("1"):
+                subprocess.Popen("pkill -10 "+uyga,shell=True,stdout=subprocess.PIPE).stdout.read()
+                global ana_uyg
+                ana_uyg=uyga
+                import sys
+                app = QtGui.QApplication(sys.argv)
+                Form = QtGui.QWidget()
+                ui = Ui_Form()
+                ui.setupUi(Form)
+                Form.show()
+                sys.exit(app.exec_())
 
 while True:
-    b = str(subprocess.Popen("ps x |grep -v grep |grep -c "+uygulama_adi, shell=True, stdout=subprocess.PIPE).stdout.read())
-    if b.__contains__("1"):
-        print(subprocess.Popen("pkill -9 "+uygulama_adi, shell=True, stdout=subprocess.PIPE).stdout.read())
-        app = QtGui.QApplication(sys.argv)
-        Dialog = QtGui.QDialog()
-        ui = Ui_Form()
-        ui.setupUi(Dialog)
-        Dialog.show()
-        sys.exit(app.exec_())
-        app.exec_()
+    Bekle().start()
+    time.sleep(3)
